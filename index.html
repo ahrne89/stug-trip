@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stugtripp 2025 — Bilkoordinator</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #F5F1EB;
+    --card: #FFFDF9;
+    --border: #E2D9CC;
+    --border-strong: #C9BFB0;
+    --text: #1A1714;
+    --muted: #6B6359;
+    --pine: #2D5016;
+    --pine-light: #EEF4E7;
+    --pine-mid: #4A7C28;
+    --amber: #C4780A;
+    --amber-light: #FEF6E4;
+    --red: #B33A2C;
+    --red-light: #FAECEA;
+    --sky: #1A5FA8;
+    --sky-light: #E8F1FB;
+    --radius: 12px;
+    --radius-sm: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #17150F;
+      --card: #1E1C16;
+      --border: #2E2A22;
+      --border-strong: #3D3830;
+      --text: #EDE8DF;
+      --muted: #9A9186;
+      --pine: #7FBB4A;
+      --pine-light: #1A2C0E;
+      --pine-mid: #7FBB4A;
+      --amber: #E8A832;
+      --amber-light: #2A1E06;
+      --red: #E06055;
+      --red-light: #2A1210;
+      --sky: #5B9EE8;
+      --sky-light: #0E1E35;
+      --shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0 0 80px;
+  }
+
+  header {
+    background: var(--pine);
+    color: #fff;
+    padding: 32px 24px 28px;
+    text-align: center;
+  }
+  header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2rem;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    margin-bottom: 6px;
+  }
+  header p {
+    font-size: 14px;
+    opacity: 0.75;
+  }
+
+  .main { max-width: 820px; margin: 0 auto; padding: 24px 16px; }
+
+  .section-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 32px 0 12px;
+  }
+
+  /* Summary bar */
+  .summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .stat {
+    background: var(--card);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+    box-shadow: var(--shadow);
+  }
+  .stat-label { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+  .stat-value { font-size: 22px; font-weight: 500; color: var(--text); }
+  .stat-value.green { color: var(--pine-mid); }
+  .stat-value.warn { color: var(--amber); }
+  .stat-value.bad { color: var(--red); }
+
+  /* Add car form */
+  .add-car-form {
+    background: var(--card);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+  }
+  .form-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr auto;
+    gap: 10px;
+    align-items: end;
+  }
+  @media (max-width: 620px) {
+    .form-row { grid-template-columns: 1fr 1fr; }
+    .form-row .btn-add { grid-column: span 2; }
+  }
+  .field label {
+    display: block;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 5px;
+    font-weight: 500;
+  }
+  input, select {
+    width: 100%;
+    height: 38px;
+    background: var(--bg);
+    border: 0.5px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    padding: 0 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  input:focus, select:focus { border-color: var(--pine-mid); }
+
+  .btn-add {
+    height: 38px;
+    background: var(--pine);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 0 20px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: opacity 0.15s;
+  }
+  .btn-add:hover { opacity: 0.88; }
+
+  /* Cars grid */
+  .cars-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 16px;
+  }
+
+  .car-card {
+    background: var(--card);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .car-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 18px 12px;
+    border-bottom: 0.5px solid var(--border);
+  }
+  .car-icon { font-size: 20px; margin-right: 10px; }
+  .car-name { font-weight: 600; font-size: 15px; }
+  .car-driver { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .car-badges { display: flex; gap: 6px; align-items: center; }
+  .badge {
+    font-size: 11px;
+    font-weight: 500;
+    padding: 3px 8px;
+    border-radius: 20px;
+  }
+  .badge-dates { background: var(--sky-light); color: var(--sky); }
+  .badge-full { background: var(--red-light); color: var(--red); }
+  .badge-open { background: var(--pine-light); color: var(--pine-mid); }
+  .btn-delete {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 16px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    line-height: 1;
+    transition: color 0.15s;
+  }
+  .btn-delete:hover { color: var(--red); }
+
+  /* Seat sections */
+  .direction-block { padding: 14px 18px; }
+  .direction-block + .direction-block { border-top: 0.5px solid var(--border); }
+  .direction-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .arrow { font-size: 13px; }
+  .seats { display: flex; flex-wrap: wrap; gap: 8px; }
+  .seat {
+    border-radius: var(--radius-sm);
+    min-width: 90px;
+    text-align: center;
+  }
+  .seat-taken {
+    background: var(--border);
+    border: 0.5px solid var(--border-strong);
+    padding: 7px 12px;
+  }
+  .seat-taken .seat-name { font-size: 13px; font-weight: 500; color: var(--text); }
+  .seat-empty {
+    border: 1.5px dashed var(--pine-mid);
+    background: var(--pine-light);
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .seat-empty:hover { border-color: var(--pine); background: #D9EDCB; }
+  .seat-empty .seat-num { font-size: 12px; color: var(--pine-mid); }
+  .seat-empty .seat-claim { font-size: 11px; color: var(--pine-mid); font-weight: 500; margin-top: 2px; }
+
+  /* Claim modal */
+  .modal-bg {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.45);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 100;
+    padding: 16px;
+  }
+  .modal {
+    background: var(--card);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    width: 100%;
+    max-width: 360px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+  }
+  .modal h3 { font-size: 16px; font-weight: 600; margin-bottom: 16px; }
+  .modal input { margin-bottom: 12px; }
+  .modal-actions { display: flex; gap: 8px; margin-top: 4px; }
+  .btn-confirm {
+    flex: 1; height: 38px;
+    background: var(--pine);
+    color: #fff; border: none;
+    border-radius: var(--radius-sm);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px; font-weight: 500;
+    cursor: pointer; transition: opacity 0.15s;
+  }
+  .btn-confirm:hover { opacity: 0.88; }
+  .btn-cancel {
+    height: 38px; padding: 0 16px;
+    background: none;
+    border: 0.5px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px; color: var(--muted);
+    cursor: pointer;
+  }
+
+  /* Coverage overview */
+  .coverage-table {
+    background: var(--card);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .coverage-row {
+    display: flex;
+    align-items: center;
+    padding: 11px 18px;
+    border-bottom: 0.5px solid var(--border);
+    gap: 12px;
+    font-size: 14px;
+  }
+  .coverage-row:last-child { border-bottom: none; }
+  .cov-name { font-weight: 500; min-width: 120px; }
+  .cov-leg {
+    display: flex; gap: 6px;
+  }
+  .leg-tag {
+    font-size: 11px; font-weight: 500;
+    padding: 3px 8px; border-radius: 20px;
+  }
+  .leg-ok { background: var(--pine-light); color: var(--pine-mid); }
+  .leg-missing { background: var(--red-light); color: var(--red); }
+  .leg-na { background: var(--border); color: var(--muted); }
+  .cov-status { margin-left: auto; font-size: 12px; }
+
+  .empty-state {
+    text-align: center;
+    padding: 48px 24px;
+    color: var(--muted);
+    font-size: 14px;
+  }
+  .empty-state .big { font-size: 40px; margin-bottom: 12px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🌲 Stugtripp 2025</h1>
+  <p>Vem åker i vilken bil?</p>
+  <p id="save-status" style="font-size:12px;opacity:0.6;margin-top:6px;min-height:16px;"></p>
+</header>
+
+<div class="main">
+
+  <!-- Stats -->
+  <div class="summary" id="summary"></div>
+
+  <!-- People count -->
+  <div class="section-title">Antal personer som ska till stugan</div>
+  <div class="add-car-form" style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+    <div style="flex:1;min-width:200px;">
+      <div style="font-size:14px;color:var(--muted);margin-bottom:4px;">Ange hur många som ska åka totalt — används för att se om alla har plats.</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <button onclick="changePeople(-1)" style="width:36px;height:36px;border:0.5px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--bg);color:var(--text);font-size:18px;cursor:pointer;font-family:'DM Sans',sans-serif;">−</button>
+      <span id="people-display" style="font-size:24px;font-weight:500;min-width:36px;text-align:center;">10</span>
+      <button onclick="changePeople(1)" style="width:36px;height:36px;border:0.5px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--bg);color:var(--text);font-size:18px;cursor:pointer;font-family:'DM Sans',sans-serif;">+</button>
+      <span style="font-size:14px;color:var(--muted);margin-left:4px;">personer</span>
+    </div>
+  </div>
+
+  <!-- Add car -->
+  <div class="section-title">Lägg till bil</div>
+  <div class="add-car-form">
+    <div class="form-row">
+      <div class="field">
+        <label>Förare / Bilnamn</label>
+        <input type="text" id="in-driver" placeholder="t.ex. Axels Volvo">
+      </div>
+      <div class="field">
+        <label>Antal platser</label>
+        <input type="number" id="in-seats" min="1" max="9" value="4">
+      </div>
+      <div class="field">
+        <label>Åker dit</label>
+        <select id="in-depart">
+          <option value="fri">Fredag</option>
+          <option value="sat">Lördag</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Åker hem</label>
+        <select id="in-return">
+          <option value="sun">Söndag</option>
+          <option value="sat">Lördag</option>
+        </select>
+      </div>
+      <button class="btn-add" onclick="addCar()">+ Lägg till</button>
+    </div>
+  </div>
+
+  <!-- Cars -->
+  <div class="section-title">Bilar</div>
+  <div class="cars-grid" id="cars-grid">
+    <div class="empty-state" id="empty-cars">
+      <div class="big">🚗</div>
+      Inga bilar än. Lägg till en bil ovan!
+    </div>
+  </div>
+
+  <!-- Coverage -->
+  <div class="section-title">Passagerare — täckning</div>
+  <div id="coverage-wrap">
+    <div class="empty-state" style="background: var(--card); border: 0.5px solid var(--border); border-radius: var(--radius);">
+      <div class="big">👥</div>
+      Lägg till bilar och folk för att se täckning
+    </div>
+  </div>
+
+</div>
+
+<!-- Modal -->
+<div class="modal-bg" id="modal" style="display:none">
+  <div class="modal">
+    <h3 id="modal-title">Ta en plats</h3>
+    <input type="text" id="modal-name" placeholder="Ditt namn" autofocus>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Avbryt</button>
+      <button class="btn-confirm" onclick="confirmSeat()">Ta platsen</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://bnbrsjcytwsuqikfbrla.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuYnJzamN5dHdzdXFpa2ZicmxhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0NjQzODMsImV4cCI6MjA5MjA0MDM4M30.AngpbSR8cGIQSe06T1dc1FIDnr5yvoUFvwYaJuiYFtg';
+const HEADERS = { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY };
+const ROW_ID = 1;
+
+let cars = [];
+let totalPeople = 10;
+let pendingSeat = null;
+let saving = false;
+
+async function loadFromSupabase() {
+  setStatus('Laddar...');
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/stugtripp?id=eq.${ROW_ID}&select=data`, { headers: HEADERS });
+    const rows = await res.json();
+    if (rows && rows.length > 0 && rows[0].data) {
+      cars = rows[0].data.cars || [];
+      totalPeople = rows[0].data.totalPeople || 10;
+    } else {
+      await initRow();
+    }
+  } catch(e) { setStatus('Fel vid laddning'); console.error(e); return; }
+  document.getElementById('people-display').textContent = totalPeople;
+  setStatus('');
+  render();
+}
+
+async function initRow() {
+  await fetch(`${SUPABASE_URL}/rest/v1/stugtripp`, {
+    method: 'POST',
+    headers: { ...HEADERS, 'Prefer': 'return=minimal' },
+    body: JSON.stringify({ id: ROW_ID, data: { cars: [], totalPeople: 10 } })
+  });
+}
+
+async function save() {
+  if (saving) return;
+  saving = true;
+  setStatus('Sparar...');
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/stugtripp?id=eq.${ROW_ID}`, {
+      method: 'PATCH',
+      headers: { ...HEADERS, 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ data: { cars, totalPeople } })
+    });
+    setStatus('Sparat ✓');
+    setTimeout(() => setStatus(''), 1500);
+  } catch(e) { setStatus('Fel vid sparning'); }
+  saving = false;
+}
+
+function setStatus(msg) {
+  let el = document.getElementById('save-status');
+  if (el) el.textContent = msg;
+}
+
+function changePeople(delta) {
+  totalPeople = Math.max(1, totalPeople + delta);
+  document.getElementById('people-display').textContent = totalPeople;
+  renderSummary();
+  save();
+}
+
+const DAY_LABEL = { fri: 'Fredag', sat: 'Lördag', sun: 'Söndag' };
+const LEGS = ['fri-out', 'sat-out', 'sat-home', 'sun-home'];
+
+function addCar() {
+  const driver = document.getElementById('in-driver').value.trim();
+  const seats = parseInt(document.getElementById('in-seats').value);
+  const depart = document.getElementById('in-depart').value;
+  const ret = document.getElementById('in-return').value;
+  if (!driver) { alert('Ange namn på bil/förare'); return; }
+  if (depart === 'sat' && ret === 'sat') { alert('Kan inte åka dit och hem samma dag (lördag)'); return; }
+
+  const car = {
+    id: Date.now(),
+    name: driver,
+    seats,
+    depart,
+    return: ret,
+    legs: {}
+  };
+
+  // Init legs based on schedule
+  // Outbound leg
+  car.legs[depart + '-out'] = [{ name: driver, driver: true }];
+  // Return leg
+  car.legs[ret + '-home'] = [{ name: driver, driver: true }];
+
+  cars.push(car);
+  save();
+  document.getElementById('in-driver').value = '';
+  render();
+}
+
+function deleteCar(id) {
+  if (!confirm('Ta bort bilen?')) return;
+  cars = cars.filter(c => c.id !== id);
+  save(); render();
+}
+
+function openModal(carId, leg, seatIdx) {
+  pendingSeat = { carId, leg, seatIdx };
+  const car = cars.find(c => c.id === carId);
+  const legParts = leg.split('-');
+  const dir = legParts[1] === 'out' ? 'till stugan' : 'hem';
+  const day = DAY_LABEL[legParts[0]];
+  document.getElementById('modal-title').textContent = `Ta plats — ${day} ${dir}`;
+  document.getElementById('modal-name').value = '';
+  document.getElementById('modal').style.display = 'flex';
+  setTimeout(() => document.getElementById('modal-name').focus(), 50);
+}
+
+function closeModal() {
+  document.getElementById('modal').style.display = 'none';
+  pendingSeat = null;
+}
+
+function confirmSeat() {
+  const name = document.getElementById('modal-name').value.trim();
+  if (!name) { alert('Ange ditt namn'); return; }
+  const { carId, leg, seatIdx } = pendingSeat;
+  const car = cars.find(c => c.id === carId);
+  if (!car.legs[leg]) car.legs[leg] = [{ name: car.name, driver: true }];
+  car.legs[leg].push({ name });
+  save(); closeModal(); render();
+}
+
+function freeSeat(carId, leg, name) {
+  if (!confirm(`Ta bort ${name} från den här resan?`)) return;
+  const car = cars.find(c => c.id === carId);
+  car.legs[leg] = car.legs[leg].filter(p => p.name !== name || p.driver);
+  save(); render();
+}
+
+function legLabel(leg) {
+  const parts = leg.split('-');
+  const day = DAY_LABEL[parts[0]];
+  const dir = parts[1] === 'out' ? '→ Stugan' : '→ Hem';
+  return `${day} ${dir}`;
+}
+
+function render() {
+  const grid = document.getElementById('cars-grid');
+  const emptyMsg = document.getElementById('empty-cars');
+  grid.innerHTML = '';
+
+  if (cars.length === 0) {
+    grid.appendChild(Object.assign(document.createElement('div'), {
+      className: 'empty-state',
+      innerHTML: '<div class="big">🚗</div>Inga bilar än. Lägg till en bil ovan!'
+    }));
+    renderSummary(); renderCoverage(); return;
+  }
+
+  cars.forEach(car => {
+    const activelegs = Object.keys(car.legs);
+    const isFull = activelegs.every(leg => (car.legs[leg] || []).length >= car.seats);
+    const datesStr = `${DAY_LABEL[car.depart].slice(0,3)} – ${DAY_LABEL[car.return].slice(0,3)}`;
+
+    let legsHtml = '';
+    activelegs.forEach(leg => {
+      const passengers = car.legs[leg] || [{ name: car.name, driver: true }];
+      let seatsHtml = '';
+      passengers.forEach(p => {
+        if (p.driver) {
+          seatsHtml += `<div class="seat seat-taken"><div class="seat-name">🚗 ${p.name}</div></div>`;
+        } else {
+          seatsHtml += `<div class="seat seat-taken" onclick="freeSeat(${car.id},'${leg}','${p.name}')" title="Klicka för att ta bort"><div class="seat-name">👤 ${p.name}</div></div>`;
+        }
+      });
+      const emptyCount = car.seats - passengers.length;
+      for (let i = 0; i < emptyCount; i++) {
+        const seatNum = passengers.length + i + 1;
+        seatsHtml += `<div class="seat seat-empty" onclick="openModal(${car.id},'${leg}',${seatNum})">
+          <div class="seat-num">Plats ${seatNum}</div>
+          <div class="seat-claim">+ Ta plats</div>
+        </div>`;
+      }
+      legsHtml += `<div class="direction-block">
+        <div class="direction-label"><span class="arrow">${leg.includes('out') ? '➡' : '⬅'}</span> ${legLabel(leg)}</div>
+        <div class="seats">${seatsHtml}</div>
+      </div>`;
+    });
+
+    const filledLeg = activelegs.every(leg => (car.legs[leg]||[]).length >= car.seats);
+    grid.innerHTML += `<div class="car-card">
+      <div class="car-header">
+        <div style="display:flex;align-items:center">
+          <span class="car-icon">🚗</span>
+          <div>
+            <div class="car-name">${car.name}</div>
+            <div class="car-driver">${car.seats} platser</div>
+          </div>
+        </div>
+        <div class="car-badges">
+          <span class="badge badge-dates">${datesStr}</span>
+          <span class="badge ${filledLeg ? 'badge-full' : 'badge-open'}">${filledLeg ? 'Full' : 'Platser kvar'}</span>
+          <button class="btn-delete" onclick="deleteCar(${car.id})">✕</button>
+        </div>
+      </div>
+      ${legsHtml}
+    </div>`;
+  });
+
+  renderSummary();
+  renderCoverage();
+}
+
+function renderSummary() {
+  const totalSeats = cars.reduce((a, c) => a + Object.keys(c.legs).length * c.seats, 0);
+  const filledSeats = cars.reduce((a, c) => a + Object.values(c.legs).reduce((b, p) => b + p.length, 0), 0);
+  const openSeats = totalSeats - filledSeats;
+
+  // Unique people who have at least one seat booked
+  const bookedPeople = new Set();
+  cars.forEach(car => Object.values(car.legs).forEach(passengers => passengers.forEach(p => bookedPeople.add(p.name))));
+  const bookedCount = bookedPeople.size;
+  const remaining = totalPeople - bookedCount;
+  const remainingCls = remaining <= 0 ? 'green' : remaining <= 3 ? 'warn' : 'bad';
+  const openCls = openSeats > 0 ? 'green' : 'bad';
+
+  document.getElementById('summary').innerHTML = `
+    <div class="stat"><div class="stat-label">Ska åka</div><div class="stat-value">${totalPeople}</div></div>
+    <div class="stat"><div class="stat-label">Har plats</div><div class="stat-value">${bookedCount}</div></div>
+    <div class="stat"><div class="stat-label">Saknar plats</div><div class="stat-value ${remainingCls}">${Math.max(0, remaining)}</div></div>
+    <div class="stat"><div class="stat-label">Lediga platser</div><div class="stat-value ${openCls}">${openSeats}</div></div>
+    <div class="stat"><div class="stat-label">Bilar</div><div class="stat-value">${cars.length}</div></div>
+  `;
+}
+
+function renderCoverage() {
+  const wrap = document.getElementById('coverage-wrap');
+  // Collect all unique passenger names
+  const personLegs = {};
+  cars.forEach(car => {
+    Object.entries(car.legs).forEach(([leg, passengers]) => {
+      passengers.forEach(p => {
+        if (!personLegs[p.name]) personLegs[p.name] = new Set();
+        personLegs[p.name].add(leg);
+      });
+    });
+  });
+
+  const people = Object.keys(personLegs);
+  if (people.length === 0) {
+    wrap.innerHTML = `<div class="empty-state" style="background:var(--card);border:0.5px solid var(--border);border-radius:var(--radius)"><div class="big">👥</div>Ingen har tagit en plats ännu</div>`;
+    return;
+  }
+
+  // What legs exist at all?
+  const existingLegs = new Set();
+  cars.forEach(c => Object.keys(c.legs).forEach(l => existingLegs.add(l)));
+
+  let rows = '';
+  people.forEach(name => {
+    const myLegs = personLegs[name];
+    let legTags = '';
+    existingLegs.forEach(leg => {
+      const label = legLabel(leg);
+      if (myLegs.has(leg)) {
+        legTags += `<span class="leg-tag leg-ok">${label}</span>`;
+      } else {
+        legTags += `<span class="leg-tag leg-missing">${label} — saknas</span>`;
+      }
+    });
+    const allCovered = [...existingLegs].every(l => myLegs.has(l));
+    rows += `<div class="coverage-row">
+      <div class="cov-name">👤 ${name}</div>
+      <div class="cov-leg">${legTags}</div>
+      <div class="cov-status">${allCovered ? '✅' : '⚠️'}</div>
+    </div>`;
+  });
+
+  wrap.innerHTML = `<div class="coverage-table">${rows}</div>`;
+}
+
+// Modal enter key
+document.getElementById('modal-name').addEventListener('keydown', e => {
+  if (e.key === 'Enter') confirmSeat();
+  if (e.key === 'Escape') closeModal();
+});
+document.getElementById('modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('modal')) closeModal();
+});
+
+loadFromSupabase();
+</script>
+</body>
+</html>
