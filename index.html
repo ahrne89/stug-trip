@@ -430,7 +430,7 @@ let saving = false;
 async function loadFromSupabase() {
   setStatus('Laddar...');
   try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/stugtripp?id=eq.${ROW_ID}&select=data`, { headers: HEADERS });
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/stugtrip?id=eq.${ROW_ID}&select=data`, { headers: HEADERS });
     const rows = await res.json();
     if (rows && rows.length > 0 && rows[0].data) {
       cars = rows[0].data.cars || [];
@@ -445,7 +445,7 @@ async function loadFromSupabase() {
 }
 
 async function initRow() {
-  await fetch(`${SUPABASE_URL}/rest/v1/stugtripp`, {
+  await fetch(`${SUPABASE_URL}/rest/v1/stugtrip`, {
     method: 'POST',
     headers: { ...HEADERS, 'Prefer': 'return=minimal' },
     body: JSON.stringify({ id: ROW_ID, data: { cars: [], totalPeople: 10 } })
@@ -457,7 +457,7 @@ async function save() {
   saving = true;
   setStatus('Sparar...');
   try {
-    await fetch(`${SUPABASE_URL}/rest/v1/stugtripp?id=eq.${ROW_ID}`, {
+    await fetch(`${SUPABASE_URL}/rest/v1/stugtrip?id=eq.${ROW_ID}`, {
       method: 'PATCH',
       headers: { ...HEADERS, 'Prefer': 'return=minimal' },
       body: JSON.stringify({ data: { cars, totalPeople } })
